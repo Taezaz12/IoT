@@ -1,0 +1,295 @@
+
+<style>
+  :root {
+    --brown-50: #f5efe8;
+    --brown-100: #e8ddd0;
+    --brown-200: #d4c4b0;
+    --brown-400: #a68b6e;
+    --brown-600: #7a6248;
+    --brown-800: #4e3d2c;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  .dashboard {
+    background: var(--brown-50);
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    font-family: var(--font-sans);
+  }
+  .dash-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--brown-800);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1.5px solid var(--brown-200);
+    padding-bottom: 0.75rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+  .card {
+    background: #fffdf9;
+    border: 0.5px solid var(--brown-200);
+    border-radius: var(--border-radius-lg);
+    padding: 1rem 1.25rem;
+  }
+  .card-label {
+    font-size: 12px;
+    color: var(--brown-400);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; }
+  .toggle-status { font-size: 14px; color: var(--brown-600); font-weight: 500; }
+  .toggle-btn {
+    position: relative; width: 54px; height: 28px;
+    background: var(--brown-200); border-radius: 14px;
+    border: none; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+  }
+  .toggle-btn.on { background: var(--brown-600); }
+  .toggle-btn::after {
+    content: ''; position: absolute; width: 22px; height: 22px;
+    border-radius: 50%; background: white; top: 3px; left: 3px; transition: left 0.2s;
+  }
+  .toggle-btn.on::after { left: 29px; }
+  .slider-wrap { display: flex; flex-direction: column; gap: 8px; }
+  .slider-row { display: flex; align-items: center; gap: 10px; }
+  input[type=range] { flex: 1; accent-color: var(--brown-600); height: 4px; }
+  .slider-val { font-size: 14px; font-weight: 500; color: var(--brown-800); min-width: 36px; text-align: right; }
+  .led-row { display: flex; align-items: center; justify-content: space-between; }
+  .led-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--brown-200); border: 2px solid var(--brown-400);
+    transition: background 0.3s, box-shadow 0.3s;
+  }
+  .led-dot.active { background: #c8a96e; border-color: var(--brown-600); box-shadow: 0 0 6px #c8a96e; }
+  .led-text { font-size: 14px; color: var(--brown-600); font-weight: 500; }
+  .gauge-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .gauge-svg { width: 140px; height: 82px; }
+  .action-btn {
+    margin-top: 10px;
+    background: var(--brown-600); color: white; border: none;
+    border-radius: var(--border-radius-md); padding: 7px 16px;
+    font-size: 13px; cursor: pointer; font-family: var(--font-sans);
+    display: flex; align-items: center; gap: 6px;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .action-btn:hover { background: var(--brown-800); }
+  .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 11px; padding: 3px 8px;
+    border-radius: var(--border-radius-md);
+    background: var(--brown-100); color: var(--brown-600);
+    margin-top: 8px; min-height: 22px;
+  }
+  .status-tag.ok { background: #eaf3de; color: #3B6D11; }
+  .status-tag.err { background: #fcebeb; color: #A32D2D; }
+  .text-input {
+    width: 100%; padding: 8px 10px;
+    border: 0.5px solid var(--brown-200);
+    border-radius: var(--border-radius-md);
+    background: var(--brown-50);
+    color: var(--brown-800); font-size: 14px;
+    font-family: var(--font-sans);
+    outline: none; margin-top: 4px;
+    transition: border-color 0.15s;
+  }
+  .text-input:focus { border-color: var(--brown-600); }
+  .label-box {
+    background: var(--brown-100); border-radius: var(--border-radius-md);
+    border: 0.5px solid var(--brown-200); padding: 8px 12px;
+    font-size: 13px; color: var(--brown-800); min-height: 34px;
+    word-break: break-word; margin-top: 8px;
+  }
+</style>
+
+<h2 class="sr-only">Blynk IoT Dashboard</h2>
+
+<div class="dashboard">
+  <div class="dash-title">
+    <i class="ti ti-cpu" aria-hidden="true" style="font-size:20px;color:var(--brown-600)"></i>
+    Blynk Dashboard
+  </div>
+
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-label"><i class="ti ti-toggle-left" aria-hidden="true" style="font-size:15px"></i>ปุ่มเปิด/ปิด (V0)</div>
+      <div class="toggle-row">
+        <span class="toggle-status" id="toggle-text">ปิดอยู่</span>
+        <button class="toggle-btn" id="toggleBtn" aria-label="เปิด/ปิด" onclick="handleToggle()"></button>
+      </div>
+      <div id="toggle-status" class="status-tag"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-label"><i class="ti ti-brightness" aria-hidden="true" style="font-size:15px"></i>ปรับค่าแสง (V2)</div>
+      <div class="slider-wrap">
+        <div class="slider-row">
+          <input type="range" min="0" max="255" step="1" value="128" id="lightSlider"
+            oninput="document.getElementById('lightVal').textContent=this.value" />
+          <span class="slider-val" id="lightVal">128</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--brown-400)">
+          <span>0</span><span>255</span>
+        </div>
+        <button class="action-btn" id="lightBtn" onclick="handleLight()">
+          <i class="ti ti-send" aria-hidden="true" style="font-size:14px"></i> ส่งค่า
+        </button>
+        <div id="light-status" class="status-tag"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label"><i class="ti ti-bulb" aria-hidden="true" style="font-size:15px"></i>สถานะการทำงาน LED (V1)</div>
+      <div class="led-row">
+        <div>
+          <div class="led-text" id="led-text">ดับ</div>
+          <div id="led-status" class="status-tag"></div>
+        </div>
+        <div class="led-dot" id="ledDot"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label"><i class="ti ti-temperature" aria-hidden="true" style="font-size:15px"></i>ค่าอุณหภูมิ (V3)</div>
+      <div class="slider-wrap">
+        <div class="gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 140 82" xmlns="http://www.w3.org/2000/svg">
+            <path d="M 10 76 A 60 60 0 0 1 130 76" fill="none" stroke="#e8ddd0" stroke-width="10" stroke-linecap="round"/>
+            <path id="gaugeFill" d="M 10 76 A 60 60 0 0 1 130 76" fill="none" stroke="#7a6248" stroke-width="10" stroke-linecap="round" stroke-dasharray="0 188"/>
+            <text x="70" y="70" text-anchor="middle" font-size="20" font-weight="500" fill="#4e3d2c" id="gaugeText">0</text>
+            <text x="70" y="82" text-anchor="middle" font-size="10" fill="#a68b6e">°C</text>
+          </svg>
+        </div>
+        <div class="slider-row">
+          <input type="range" min="0" max="100" step="1" value="0" id="tempSlider" oninput="onTempSlide(this.value)" />
+          <span class="slider-val" id="tempVal">0</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--brown-400)">
+          <span>0°C</span><span>100°C</span>
+        </div>
+        <button class="action-btn" id="tempBtn" onclick="handleTemp()">
+          <i class="ti ti-send" aria-hidden="true" style="font-size:14px"></i> ส่งค่า
+        </button>
+        <div id="temp-status" class="status-tag"></div>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column: 1 / -1">
+      <div class="card-label"><i class="ti ti-message-dots" aria-hidden="true" style="font-size:15px"></i>การตอบกลับ — label (V4)</div>
+      <input type="text" class="text-input" id="labelInput" placeholder="พิมพ์ข้อความที่ต้องการส่ง..." maxlength="200"
+        onkeydown="if(event.key==='Enter') handleLabel()" />
+      <button class="action-btn" id="labelBtn" onclick="handleLabel()">
+        <i class="ti ti-send" aria-hidden="true" style="font-size:14px"></i> ส่งข้อความ
+      </button>
+      <div id="label-status" class="status-tag"></div>
+      <div class="label-box" id="labelBox" style="display:none"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const TOKEN = 'PYUEDH1vfhW5XOPokW395g5alJG_w83O';
+const BASE = 'https://blynk.cloud/external/api';
+
+let toggleState = 0;
+
+function setStatus(id, ok, msg) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = (ok ? '✓ ' : '✗ ') + msg;
+  el.className = 'status-tag ' + (ok ? 'ok' : 'err');
+}
+
+function setBtn(id, loading) {
+  const btn = document.getElementById(id);
+  if (btn) btn.disabled = loading;
+}
+
+async function callApi(url, btnId, statusId, onSuccess) {
+  if (btnId) setBtn(btnId, true);
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    if (res.ok) {
+      setStatus(statusId, true, 'สำเร็จ');
+      if (onSuccess) onSuccess(text.trim());
+    } else {
+      setStatus(statusId, false, 'Error ' + res.status);
+    }
+  } catch(e) {
+    setStatus(statusId, false, 'ไม่สามารถเชื่อมต่อได้');
+  }
+  if (btnId) setBtn(btnId, false);
+}
+
+function updateLED(val) {
+  const isOn = parseInt(val) === 1;
+  document.getElementById('ledDot').className = 'led-dot' + (isOn ? ' active' : '');
+  document.getElementById('led-text').textContent = isOn ? 'ทำงานอยู่' : 'ดับ';
+}
+
+async function handleToggle() {
+  toggleState = toggleState === 0 ? 1 : 0;
+  const btn = document.getElementById('toggleBtn');
+  const txt = document.getElementById('toggle-text');
+  btn.className = 'toggle-btn' + (toggleState ? ' on' : '');
+  txt.textContent = toggleState ? 'เปิดอยู่' : 'ปิดอยู่';
+
+  await callApi(`${BASE}/update?token=${TOKEN}&V0=${toggleState}`, null, 'toggle-status', null);
+
+  const ledVal = toggleState;
+  await callApi(`${BASE}/update?token=${TOKEN}&V1=${ledVal}`, null, 'led-status', (t) => {
+    updateLED(ledVal);
+  });
+  setStatus('led-status', true, toggleState ? 'LED เปิด' : 'LED ปิด');
+}
+
+function handleLight() {
+  const val = document.getElementById('lightSlider').value;
+  callApi(`${BASE}/update?token=${TOKEN}&V2=${val}`, 'lightBtn', 'light-status', null);
+}
+
+function onTempSlide(val) {
+  document.getElementById('tempVal').textContent = val;
+  updateGauge(parseInt(val));
+}
+
+function handleTemp() {
+  const val = document.getElementById('tempSlider').value;
+  callApi(`${BASE}/update?token=${TOKEN}&V3=${val}`, 'tempBtn', 'temp-status', null);
+}
+
+function handleLabel() {
+  const msg = document.getElementById('labelInput').value.trim();
+  if (!msg) {
+    setStatus('label-status', false, 'กรุณาพิมพ์ข้อความก่อน');
+    return;
+  }
+  const encoded = encodeURIComponent(msg);
+  callApi(`${BASE}/update?token=${TOKEN}&V4=${encoded}`, 'labelBtn', 'label-status', () => {
+    const box = document.getElementById('labelBox');
+    box.style.display = 'block';
+    box.textContent = '→ ส่งแล้ว: "' + msg + '"';
+  });
+}
+
+function updateGauge(val) {
+  const pct = Math.min(Math.max(val / 100, 0), 1);
+  const fill = Math.round(pct * 188);
+  document.getElementById('gaugeFill').setAttribute('stroke-dasharray', fill + ' ' + (188 - fill));
+  document.getElementById('gaugeText').textContent = val;
+}
+</script>
